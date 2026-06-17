@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>STONE MOTOR</title>
+
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+<style>
+
+body{
+
+font-family:Arial;
+
+text-align:center;
+
+margin-top:80px;
+
+}
+
+h1{
+
+font-size:50px;
+
+}
+
+button{
+
+width:180px;
+
+height:100px;
+
+font-size:40px;
+
+margin:20px;
+
+}
+
+#status{
+
+font-size:28px;
+
+margin:30px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>STONE MOTOR</h1>
+
+<div id="status">🔴 未连接</div>
+
+<div>
+
+<button onclick="sendCmd('KEY3')">
+
+KEY3
+
+</button>
+
+<button onclick="sendCmd('KEY4')">
+
+KEY4
+
+</button>
+
+</div>
+
+<div>
+
+<button onclick="sendCmd('KEY5')">
+
+KEY5
+
+</button>
+
+<button onclick="sendCmd('KEY7')">
+
+KEY7
+
+</button>
+
+</div>
+
+<script>
+
+//================ HiveMQ Cloud ================
+
+const broker =
+'wss://ed4df66491114cee9225255edfaa2e64.s1.eu.hivemq.cloud:8884/mqtt';
+
+const options = {
+
+username:'stone',
+
+password:'Stone123'
+
+};
+
+//================ MQTT连接 ================
+
+const client = mqtt.connect(
+
+broker,
+
+options
+
+);
+
+client.on(
+
+'connect',
+
+()=>{
+
+document.getElementById(
+
+'status'
+
+).innerHTML='🟢 已连接';
+
+console.log('MQTT连接成功');
+
+}
+
+);
+
+client.on(
+
+'error',
+
+(err)=>{
+
+document.getElementById(
+
+'status'
+
+).innerHTML='🔴 连接失败';
+
+console.log(err);
+
+}
+
+);
+
+//================ 按钮发送 ================
+
+function sendCmd(cmd)
+
+{
+
+client.publish(
+
+'stone/motor/cmd',
+
+cmd
+
+);
+
+console.log(cmd);
+
+}
+
+</script>
+
+</body>
+
+</html>
