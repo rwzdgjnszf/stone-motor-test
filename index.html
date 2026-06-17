@@ -15,49 +15,27 @@
 <style>
 
 body{
-
-font-family:Arial,sans-serif;
-
-background:#f5f5f5;
-
+font-family:Arial;
 text-align:center;
-
-margin:0;
-
-padding:0;
-
+background:#f5f5f5;
+margin-top:60px;
 }
 
 h1{
-
-margin-top:50px;
-
-font-size:55px;
-
+font-size:60px;
+margin-bottom:20px;
 }
 
 #status{
-
 font-size:32px;
-
-margin:30px;
-
-font-weight:bold;
-
+margin-bottom:30px;
 }
 
 .container{
-
 display:grid;
-
-grid-template-columns:repeat(2,220px);
-
+grid-template-columns:220px 220px;
 gap:30px;
-
 justify-content:center;
-
-margin-top:30px;
-
 }
 
 button{
@@ -66,66 +44,44 @@ width:220px;
 
 height:120px;
 
-font-size:38px;
+font-size:42px;
 
 border:none;
 
 border-radius:15px;
 
+color:white;
+
 cursor:pointer;
 
 box-shadow:0 4px 10px rgba(0,0,0,0.2);
 
-transition:0.15s;
-
-}
-
-button:active{
-
-transform:scale(0.95);
-
 }
 
 .stop{
-
 background:#ff4d4d;
-
-color:white;
-
 }
 
 .run{
-
-background:#00b050;
-
-color:white;
-
+background:#00b140;
 }
 
 .forward{
-
-background:#0078ff;
-
-color:white;
-
+background:#1677ff;
 }
 
 .backward{
-
 background:#ff9900;
+}
 
-color:white;
-
+button:active{
+transform:scale(0.95);
 }
 
 .footer{
-
-margin-top:60px;
-
-font-size:18px;
-
+margin-top:50px;
+font-size:24px;
 color:#666;
-
 }
 
 </style>
@@ -138,38 +94,38 @@ color:#666;
 
 <div id="status">
 
-🔴 正在连接...
+🟠 连接中...
 
 </div>
 
 <div class="container">
 
-<button class="stop"
-
+<button
+class="stop"
 onclick="sendCmd('KEY3')">
 
 ⏸ 暂停
 
 </button>
 
-<button class="run"
-
+<button
+class="run"
 onclick="sendCmd('KEY4')">
 
 ▶ 运行
 
 </button>
 
-<button class="forward"
-
+<button
+class="forward"
 onclick="sendCmd('KEY5')">
 
 ⬆ 前进
 
 </button>
 
-<button class="backward"
-
+<button
+class="backward"
 onclick="sendCmd('KEY7')">
 
 ⬇ 后退
@@ -186,25 +142,38 @@ ESP32 + HiveMQ Cloud
 
 <script>
 
-//================ MQTT连接 =================//
+//================ HiveMQ Cloud ================
 
-const client = mqtt.connect(
+const broker =
+'wss://ed4df66491114cee9225255edfaa2e64.s1.eu.hivemq.cloud:8884/mqtt';
 
-'wss://ed4df66491114cee9225255edfaa2e64.s1.eu.hivemq.cloud:8884/mqtt',
-
-{
+const options = {
 
 username:'stone',
 
 password:'Stone123',
 
+clientId:'web_'+Math.random().toString(16).substr(2,8),
+
+clean:true,
+
+connectTimeout:10000,
+
 reconnectPeriod:3000
 
-}
+};
+
+//================ 建立连接 ================
+
+const client = mqtt.connect(
+
+broker,
+
+options
 
 );
 
-//================ 连接成功 =================//
+//================ 连接成功 ================
 
 client.on(
 
@@ -218,17 +187,33 @@ document.getElementById(
 
 ).innerHTML='🟢 已连接';
 
-console.log(
-
-'MQTT Connected'
-
-);
+console.log('MQTT Connected');
 
 }
 
 );
 
-//================ 连接失败 =================//
+//================ 断开连接 ================
+
+client.on(
+
+'reconnect',
+
+()=>{
+
+document.getElementById(
+
+'status'
+
+).innerHTML='🟠 重连中...';
+
+console.log('Reconnect');
+
+}
+
+);
+
+//================ 错误信息 ================
 
 client.on(
 
@@ -248,25 +233,7 @@ console.log(err);
 
 );
 
-//================ 断开连接 =================//
-
-client.on(
-
-'offline',
-
-()=>{
-
-document.getElementById(
-
-'status'
-
-).innerHTML='🟠 重连中...';
-
-}
-
-);
-
-//================ 发送命令 =================//
+//================ 发送命令 ================
 
 function sendCmd(cmd)
 
@@ -304,7 +271,7 @@ else
 
 alert(
 
-'MQTT未连接'
+'尚未连接MQTT'
 
 );
 
