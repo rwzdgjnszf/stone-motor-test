@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="zh-CN">
+<html>
 
 <head>
 
@@ -8,43 +8,37 @@
 
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>STONE MOTOR</title>
+<title>ESP32 Motor Control</title>
 
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
 <style>
 
 body{
+
 font-family:Arial;
+
 text-align:center;
+
 background:#f5f5f5;
-margin-top:60px;
+
 }
 
 h1{
-font-size:60px;
-margin-bottom:20px;
-}
 
-#status{
-font-size:32px;
-margin-bottom:30px;
-}
+margin-top:30px;
 
-.container{
-display:grid;
-grid-template-columns:220px 220px;
-gap:30px;
-justify-content:center;
 }
 
 button{
 
-width:220px;
+width:180px;
 
-height:120px;
+height:70px;
 
-font-size:42px;
+font-size:24px;
+
+margin:15px;
 
 border:none;
 
@@ -52,36 +46,22 @@ border-radius:15px;
 
 color:white;
 
-cursor:pointer;
-
-box-shadow:0 4px 10px rgba(0,0,0,0.2);
-
 }
 
-.stop{
-background:#ff4d4d;
-}
+.key3{background:#e74c3c;}
 
-.run{
-background:#00b140;
-}
+.key4{background:#27ae60;}
 
-.forward{
-background:#1677ff;
-}
+.key5{background:#3498db;}
 
-.backward{
-background:#ff9900;
-}
+.key7{background:#f39c12;}
 
-button:active{
-transform:scale(0.95);
-}
+#status{
 
-.footer{
-margin-top:50px;
-font-size:24px;
-color:#666;
+margin:20px;
+
+font-size:20px;
+
 }
 
 </style>
@@ -90,90 +70,59 @@ color:#666;
 
 <body>
 
-<h1>STONE MOTOR</h1>
+<h1>ESP32 Motor Control</h1>
 
-<div id="status">
+<div id="status">连接中...</div>
 
-🟠 连接中...
+<button class="key3" onclick="sendCmd('KEY3')">
 
-</div>
-
-<div class="container">
-
-<button
-class="stop"
-onclick="sendCmd('KEY3')">
-
-⏸ 暂停
+停止
 
 </button>
 
-<button
-class="run"
-onclick="sendCmd('KEY4')">
+<br>
 
-▶ 运行
+<button class="key4" onclick="sendCmd('KEY4')">
 
-</button>
-
-<button
-class="forward"
-onclick="sendCmd('KEY5')">
-
-⬆ 前进
+自动运行
 
 </button>
 
-<button
-class="backward"
-onclick="sendCmd('KEY7')">
+<br>
 
-⬇ 后退
+<button class="key5" onclick="sendCmd('KEY5')">
+
+正转
 
 </button>
 
-</div>
+<br>
 
-<div class="footer">
+<button class="key7" onclick="sendCmd('KEY7')">
 
-ESP32 + HiveMQ Cloud
+反转
 
-</div>
+</button>
 
 <script>
 
-//================ HiveMQ Cloud ================
+const client=mqtt.connect(
 
-const broker =
-'wss://ed4df66491114cee9225255edfaa2e64.s1.eu.hivemq.cloud:8884/mqtt';
+'wss://t170ac82.ala.cn-hangzhou.emqxsl.cn:8084/mqtt',
 
-const options = {
+{
 
 username:'stone',
 
 password:'Stone123',
 
-clientId:'web_'+Math.random().toString(16).substr(2,8),
-
 clean:true,
-
-connectTimeout:10000,
 
 reconnectPeriod:3000
 
-};
-
-//================ 建立连接 ================
-
-const client = mqtt.connect(
-
-broker,
-
-options
+}
 
 );
-
-//================ 连接成功 ================
 
 client.on(
 
@@ -181,19 +130,13 @@ client.on(
 
 ()=>{
 
-document.getElementById(
+document.getElementById('status').innerHTML=
 
-'status'
-
-).innerHTML='🟢 已连接';
-
-console.log('MQTT Connected');
+'🟢 MQTT已连接';
 
 }
 
 );
-
-//================ 断开连接 ================
 
 client.on(
 
@@ -201,49 +144,29 @@ client.on(
 
 ()=>{
 
-document.getElementById(
+document.getElementById('status').innerHTML=
 
-'status'
-
-).innerHTML='🟠 重连中...';
-
-console.log('Reconnect');
+'🟡 重连中';
 
 }
 
 );
-
-//================ 错误信息 ================
 
 client.on(
 
 'error',
 
-(err)=>{
+()=>{
 
-document.getElementById(
+document.getElementById('status').innerHTML=
 
-'status'
-
-).innerHTML='🔴 连接失败';
-
-console.log(err);
+'🔴 连接失败';
 
 }
 
 );
 
-//================ 发送命令 ================
-
 function sendCmd(cmd)
-
-{
-
-if(
-
-client.connected
-
-)
 
 {
 
@@ -254,28 +177,6 @@ client.publish(
 cmd
 
 );
-
-console.log(
-
-'发送:',
-
-cmd
-
-);
-
-}
-
-else
-
-{
-
-alert(
-
-'尚未连接MQTT'
-
-);
-
-}
 
 }
 
